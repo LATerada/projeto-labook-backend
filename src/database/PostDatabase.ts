@@ -22,4 +22,8 @@ export class PostDatabase extends BaseDatabase {
       .update(newPost)
       .where({ id: newPost.id });
   }
+
+  public async removePost(id: string): Promise<void> {
+    await BaseDatabase.connection(PostDatabase.TABLE_POSTS).del().where({ id });
+  }
 }
