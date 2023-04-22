@@ -12,4 +12,8 @@ export class PostDatabase extends BaseDatabase {
     );
     return postsDB;
   }
+
+  public async createPost(newPost: PostsDB): Promise<void> {
+    await BaseDatabase.connection(PostDatabase.TABLE_POSTS).insert(newPost);
+  }
 }
