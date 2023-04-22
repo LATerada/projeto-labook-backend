@@ -11,6 +11,13 @@ export class PostDatabase extends BaseDatabase {
     return postsDB;
   }
 
+  public async findPostsById(id: string): Promise<PostDB | undefined> {
+    const [postsDB]: PostDB[] | undefined[] = await BaseDatabase.connection(
+      PostDatabase.TABLE_POSTS
+    ).where({ id });
+    return postsDB;
+  }
+
   public async createPost(newPost: PostDB): Promise<void> {
     await BaseDatabase.connection(PostDatabase.TABLE_POSTS).insert(newPost);
   }
