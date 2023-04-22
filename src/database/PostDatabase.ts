@@ -4,10 +4,8 @@ import { PostDB } from "../types";
 export class PostDatabase extends BaseDatabase {
   public static TABLE_POSTS = "posts";
 
-  public async findPosts(
-    q: string | undefined
-  ): Promise<PostDB[] | undefined[]> {
-    const postsDB: PostDB[] | undefined[] = await BaseDatabase.connection(
+  public async findPosts(): Promise<PostDB[]> {
+    const postsDB: PostDB[] = await BaseDatabase.connection(
       PostDatabase.TABLE_POSTS
     );
     return postsDB;
