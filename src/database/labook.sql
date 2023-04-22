@@ -18,7 +18,7 @@ CREATE TABLE
         likes INTEGER DEFAULT(0) NOT NULL,
         dislikes INTEGER DEFAULT(0) NOT NULL,
         created_at TEXT DEFAULT (DATETIME()) NOT NULL,
-        updated_at TEXT DEFAULT (0) NOT NULL,
+        updated_at TEXT DEFAULT (DATETIME()) NOT NULL,
         FOREIGN KEY (creator_id) REFERENCES users(id)
     );
 
@@ -36,3 +36,9 @@ SELECT * FROM users;
 SELECT * FROM posts;
 
 SELECT * FROM likes_dislikes;
+
+DROP TABLE users;
+
+DROP TABLE posts;
+
+DROP TABLE likes_dislikes;
