@@ -1,4 +1,4 @@
-export interface UsersDB {
+export interface UserDB {
   id: string;
   name: string;
   email: string;
@@ -7,7 +7,7 @@ export interface UsersDB {
   createdAt: string;
 }
 
-export interface PostsDB {
+export interface PostDB {
   id: string;
   creatorId: string;
   content: string;
@@ -17,7 +17,7 @@ export interface PostsDB {
   updatedAt: string;
 }
 
-export interface LikesDislikesDB {
+export interface LikeDislikeDB {
   user_id: string;
   post_id: string;
   like: number;
