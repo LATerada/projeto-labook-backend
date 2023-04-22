@@ -16,29 +16,29 @@ export class Post {
   public getCreatorId(): string {
     return this.creatorId;
   }
-  public setCreatorID(newCreatorId: string) {
-    this.creatorId = newCreatorId;
+  public setCreatorID(value: string) {
+    this.creatorId = value;
   }
 
   public getContent(): string {
     return this.content;
   }
-  public setContent(newContent: string) {
-    this.content = newContent;
+  public setContent(value: string) {
+    this.content = value;
   }
 
   public getLikes(): number {
     return this.likes;
   }
-  public setLikes(newLikes: number) {
-    this.likes = newLikes;
+  public setLikes(value: number) {
+    this.likes = value;
   }
 
   public getDislikes(): number {
     return this.dislikes;
   }
-  public setDislikes(newDislikes: number) {
-    this.dislikes = newDislikes;
+  public setDislikes(value: number) {
+    this.dislikes = value;
   }
 
   public getCreatedAt(): string {
@@ -48,7 +48,7 @@ export class Post {
   public getUdatedAt(): string {
     return this.updatedAt;
   }
-  public setUpdatedAt(newUpdatedAt: string) {
-    this.updatedAt = newUpdatedAt;
+  public setUpdatedAt(value: string) {
+    this.updatedAt = value;
   }
 }
