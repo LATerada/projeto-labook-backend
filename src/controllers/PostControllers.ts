@@ -71,9 +71,9 @@ export class PostControlers {
         res.status(400);
         throw new Error("'content' deve ser string");
       }
-      if (creatorId.length < 1) {
+      if (content.length < 1) {
         res.status(400);
-        throw new Error("'creatorId' deve conter pelo menos 1 caracteres");
+        throw new Error("'content' deve conter pelo menos 1 caracteres");
       }
 
       const postDatabase = new PostDatabase();
@@ -107,6 +107,95 @@ export class PostControlers {
       await postDatabase.createPost(newPostDB);
 
       res.status(200).send(newPostDB);
+    } catch (error) {
+      console.log(error);
+
+      if (req.statusCode === 200) {
+        res.status(500);
+      }
+
+      if (error instanceof Error) {
+        res.send(error.message);
+      } else {
+        res.send("Erro inesperado");
+      }
+    }
+  };
+  putPost = async (req: Request, res: Response) => {
+    try {
+      const idToEdit = req.params.id;
+      const newContent = req.body.content as string | undefined;
+
+      if (newContent !== undefined) {
+        if (typeof newContent !== "string") {
+          res.status(400);
+          throw new Error("'content' deve ser string");
+        }
+        if (newContent.length < 1) {
+          res.status(400);
+          throw new Error("'content' deve conter pelo menos 1 caracteres");
+        }
+      }
+
+      const postDatabase = new PostDatabase();
+      const postDBExists = await postDatabase.findPostsById(idToEdit);
+
+      if (!postDBExists) {
+        res.status(404);
+        throw new Error("'id' não existe");
+      }
+
+      const post = new Post(
+        idToEdit,
+        postDBExists.creator_id,
+        newContent ? newContent : postDBExists.content,
+        postDBExists.likes,
+        postDBExists.dislikes,
+        postDBExists.created_at,
+        new Date().toString()
+      );
+
+      const newPostDB: PostDB = {
+        id: post.getId(),
+        creator_id: post.getCreatorId(),
+        content: post.getContent(),
+        likes: post.getLikes(),
+        dislikes: post.getDislikes(),
+        created_at: post.getCreatedAt(),
+        updated_at: post.getUdatedAt(),
+      };
+
+      await postDatabase.editPost(newPostDB);
+      res.status(201).send(newPostDB);
+    } catch (error) {
+      console.log(error);
+
+      if (req.statusCode === 200) {
+        res.status(500);
+      }
+
+      if (error instanceof Error) {
+        res.send(error.message);
+      } else {
+        res.send("Erro inesperado");
+      }
+    }
+  };
+  deletePosts = async (req: Request, res: Response) => {
+    try {
+      const idToDelete = req.params.id;
+
+      const postDatabase = new PostDatabase();
+      const postDBExists = postDatabase.findPostsById(idToDelete);
+
+      if (!postDBExists) {
+        res.status(404);
+        throw new Error("'id' não existe");
+      }
+
+      await postDatabase.removePost(idToDelete);
+
+      res.status(200).send("Post deletado com sucesso");
     } catch (error) {
       console.log(error);
 
