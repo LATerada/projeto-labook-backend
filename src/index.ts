@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
+import { PostControlers } from "./controllers/PostControllers";
 
 const app = express();
 
@@ -27,3 +28,9 @@ app.get("/ping", async (req: Request, res: Response) => {
     }
   }
 });
+
+const postController = new PostControlers();
+
+app.get("/posts", postController.getPosts);
+
+app.post("/posts", postController.postPost);
