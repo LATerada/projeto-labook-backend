@@ -32,3 +32,5 @@ app.get("/ping", async (req: Request, res: Response) => {
 const postController = new PostControlers();
 
 app.get("/posts", postController.getPosts);
+
+app.post("/posts", postController.postPost);

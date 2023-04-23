@@ -1,4 +1,4 @@
--- Active: 1682174056477@@127.0.0.1@3306
+-- Active: 1682250019153@@127.0.0.1@3306
 
 CREATE TABLE
     users (
@@ -42,3 +42,12 @@ DROP TABLE users;
 DROP TABLE posts;
 
 DROP TABLE likes_dislikes;
+
+INSERT INTO users (id, name, email, password, role)
+VALUES (
+        "u001",
+        "User001",
+        "user1@email.com",
+        "user123456",
+        "role"
+    );
