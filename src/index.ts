@@ -36,3 +36,5 @@ app.get("/posts", postController.getPosts);
 app.post("/posts", postController.postPost);
 
 app.put("/posts/:id", postController.putPost);
+
+app.delete("/posts/:id", postController.deletePosts);

@@ -181,4 +181,33 @@ export class PostControlers {
       }
     }
   };
+  deletePosts = async (req: Request, res: Response) => {
+    try {
+      const idToDelete = req.params.id;
+
+      const postDatabase = new PostDatabase();
+      const postDBExists = postDatabase.findPostsById(idToDelete);
+
+      if (!postDBExists) {
+        res.status(404);
+        throw new Error("'id' não existe");
+      }
+
+      await postDatabase.removePost(idToDelete);
+
+      res.status(200).send("Post deletado com sucesso");
+    } catch (error) {
+      console.log(error);
+
+      if (req.statusCode === 200) {
+        res.status(500);
+      }
+
+      if (error instanceof Error) {
+        res.send(error.message);
+      } else {
+        res.send("Erro inesperado");
+      }
+    }
+  };
 }
