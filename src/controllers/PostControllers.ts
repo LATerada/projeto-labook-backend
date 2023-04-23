@@ -4,14 +4,14 @@ import { Post } from "../models/Posts";
 import { PostDB } from "../types";
 
 export class PostControlers {
-  getPosts = async (req: Request, res: Response) => {
+  public getPosts = async (req: Request, res: Response) => {
     try {
       const postDatabase = new PostDatabase();
 
       const postsDB: PostDB[] = await postDatabase.findPosts();
 
       const posts = postsDB.map((postDB) => {
-        new Post(
+        return new Post(
           postDB.id,
           postDB.creator_id,
           postDB.content,
@@ -37,7 +37,7 @@ export class PostControlers {
       }
     }
   };
-  postPost = async (req: Request, res: Response) => {
+  public postPost = async (req: Request, res: Response) => {
     try {
       const { id, creatorId, content } = req.body;
 
@@ -121,7 +121,7 @@ export class PostControlers {
       }
     }
   };
-  putPost = async (req: Request, res: Response) => {
+  public putPost = async (req: Request, res: Response) => {
     try {
       const idToEdit = req.params.id;
       const newContent = req.body.content as string | undefined;
@@ -181,7 +181,7 @@ export class PostControlers {
       }
     }
   };
-  deletePosts = async (req: Request, res: Response) => {
+  public deletePosts = async (req: Request, res: Response) => {
     try {
       const idToDelete = req.params.id;
 
