@@ -38,7 +38,7 @@ export class UserBusiness {
     await this.userDatabase.postUser(newUserDB);
 
     const output = {
-      token: newUserDB,
+      token: "signinToken",
     };
 
     return output;
@@ -58,10 +58,9 @@ export class UserBusiness {
     }
 
     // generate token
-    const token = "";
 
     const output = {
-      token,
+      token: "loginInput",
     };
 
     return output;
