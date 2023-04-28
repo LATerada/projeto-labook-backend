@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
-import { PostDatabase } from "../database/PostDatabase";
+import { PostBusiness } from "../business/PostBusiness";
 import { Post, PostDB } from "../models/Posts";
 
 export class PostControlers {
+  constructor(private postBusiness: PostBusiness) {}
+
   public getPosts = async (req: Request, res: Response) => {
     try {
-      const postDatabase = new PostDatabase();
-
-      const postsDB: PostDB[] = await postDatabase.findPosts();
+      
+      const postsDB: PostDB[] = await this.postBusiness.findPosts();
 
       const posts = postsDB.map((postDB) => {
         return new Post(
@@ -75,8 +76,7 @@ export class PostControlers {
         throw new Error("'content' deve conter pelo menos 1 caracteres");
       }
 
-      const postDatabase = new PostDatabase();
-      const postDBExists = await postDatabase.findPostsById(id);
+      const postDBExists = await this.postBusiness.findPostsById(id);
 
       if (postDBExists) {
         res.status(400);
@@ -103,7 +103,7 @@ export class PostControlers {
         updated_at: newPost.getUdatedAt(),
       };
 
-      await postDatabase.createPost(newPostDB);
+      await this.postBusiness.createPost(newPostDB);
 
       res.status(200).send(newPostDB);
     } catch (error) {
@@ -136,8 +136,7 @@ export class PostControlers {
         }
       }
 
-      const postDatabase = new PostDatabase();
-      const postDBExists = await postDatabase.findPostsById(idToEdit);
+      const postDBExists = await this.postBusiness.findPostsById(idToEdit);
 
       if (!postDBExists) {
         res.status(404);
@@ -164,7 +163,7 @@ export class PostControlers {
         updated_at: post.getUdatedAt(),
       };
 
-      await postDatabase.editPost(newPostDB);
+      await this.postBusiness.editPost(newPostDB);
       res.status(201).send(newPostDB);
     } catch (error) {
       console.log(error);
@@ -184,15 +183,14 @@ export class PostControlers {
     try {
       const idToDelete = req.params.id;
 
-      const postDatabase = new PostDatabase();
-      const postDBExists = postDatabase.findPostsById(idToDelete);
+      const postDBExists = this.postBusiness.findPostsById(idToDelete);
 
       if (!postDBExists) {
         res.status(404);
         throw new Error("'id' não existe");
       }
 
-      await postDatabase.removePost(idToDelete);
+      await this.postBusiness.removePost(idToDelete);
 
       res.status(200).send("Post deletado com sucesso");
     } catch (error) {
