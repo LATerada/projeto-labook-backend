@@ -1,4 +1,6 @@
 import { PostDatabase } from "../database/PostDatabase";
+import { BadRequestError } from "../errors/BadRequestError";
+import { NotFoundError } from "../errors/NotFoundError";
 import { Post, PostDB } from "../models/Posts";
 
 export class PostBusiness {
@@ -59,7 +61,7 @@ export class PostBusiness {
     const postDBExists = await this.postDatabase.findPostsById(id);
 
     if (postDBExists) {
-      throw new Error("'id' já existe");
+      throw new BadRequestError("'id' already exists");
     }
 
     const newPost = new Post(
@@ -106,7 +108,7 @@ export class PostBusiness {
     const postDBExists = await this.postDatabase.findPostsById(idToEdit);
 
     if (!postDBExists) {
-      throw new Error("'id' não existe");
+      throw new NotFoundError("'id' doesn't exist");
     }
 
     const post = new Post(
@@ -144,7 +146,7 @@ export class PostBusiness {
     const postDBExists = this.postDatabase.findPostsById(idToDelete);
 
     if (!postDBExists) {
-      throw new Error("'id' não existe");
+      throw new NotFoundError("'id' doesn't exist");
     }
 
     await this.postDatabase.removePost(idToDelete);
