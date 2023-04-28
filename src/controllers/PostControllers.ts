@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { PostDatabase } from "../database/PostDatabase";
-import { Post } from "../models/Posts";
-import { PostDB } from "../types";
+import { Post, PostDB } from "../models/Posts";
 
 export class PostControlers {
   public getPosts = async (req: Request, res: Response) => {
