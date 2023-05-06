@@ -3,6 +3,7 @@ import {
   CreatePostInputDTO,
   CreatePostOutputDTO,
 } from "../dtos/post/createPost.dto";
+import { EditPostInputDTO, EditPostOutputDTO } from "../dtos/post/editPost.dto";
 import { GetPostsInputDTO, GetPostsOutputDTO } from "../dtos/post/getPosts.dto";
 import { NotFoundError } from "../errors/NotFoundError";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
@@ -82,49 +83,44 @@ export class PostBusiness {
     return output;
   };
 
-  public putPost = async (input: any) => {
-    const { idToEdit, newContent } = input;
+  public putPost = async (
+    input: EditPostInputDTO
+  ): Promise<EditPostOutputDTO> => {
+    const { token, idToEdit, content } = input;
 
-    if (newContent !== undefined) {
-      if (typeof newContent !== "string") {
-        throw new Error("'content' deve ser string");
-      }
-      if (newContent.length < 1) {
-        throw new Error("'content' deve conter pelo menos 1 caracteres");
-      }
+    const payload = this.tokenManeger.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError("Invalid token");
     }
 
-    const postDBExists = await this.postDatabase.findPostsById(idToEdit);
+    const postDBExists = await this.postDatabase.findPostById(idToEdit);
 
     if (!postDBExists) {
-      throw new NotFoundError("'id' doesn't exist");
+      throw new NotFoundError("Post id not found");
+    }
+
+    if (postDBExists.creator_id !== payload.id) {
+      throw new UnauthorizedError("Only the creator of the post can edit it");
     }
 
     const post = new Post(
-      idToEdit,
-      postDBExists.creator_id,
-      newContent ? newContent : postDBExists.content,
+      postDBExists.id,
+      postDBExists.content,
       postDBExists.likes,
       postDBExists.dislikes,
       postDBExists.created_at,
-      new Date().toString()
+      postDBExists.updated_at,
+      postDBExists.creator_id,
+      payload.name
     );
 
-    const newPostDB: PostDB = {
-      id: post.getId(),
-      creator_id: post.getCreatorId(),
-      content: post.getContent(),
-      likes: post.getLikes(),
-      dislikes: post.getDislikes(),
-      created_at: post.getCreatedAt(),
-      updated_at: post.getUdatedAt(),
-    };
+    post.setContent(content);
 
-    await this.postDatabase.editPost(newPostDB);
+    const updatedPostDB = post.toDBModel();
+    await this.postDatabase.editPost(updatedPostDB);
 
-    const output = {
-      newPostDB,
-    };
+    const output: EditPostOutputDTO = undefined;
 
     return output;
   };
@@ -132,7 +128,7 @@ export class PostBusiness {
   public deletePost = async (input: any) => {
     const { idToDelete } = input;
 
-    const postDBExists = this.postDatabase.findPostsById(idToDelete);
+    const postDBExists = this.postDatabase.findPostById(idToDelete);
 
     if (!postDBExists) {
       throw new NotFoundError("'id' doesn't exist");

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ZodError } from "zod";
 import { PostBusiness } from "../business/PostBusiness";
 import { CreatePostSchema } from "../dtos/post/createPost.dto";
+import { EditPostSchema } from "../dtos/post/editPost.dto";
 import { GetPostsSchema } from "../dtos/post/getPosts.dto";
 import { BaseError } from "../errors/BaseError";
 
@@ -28,6 +29,7 @@ export class PostControlers {
       }
     }
   };
+
   public postPost = async (req: Request, res: Response) => {
     try {
       const input = CreatePostSchema.parse({
@@ -36,6 +38,30 @@ export class PostControlers {
       });
 
       const output = await this.postBusiness.postPost(input);
+
+      res.status(201).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
+    }
+  };
+
+  public putPost = async (req: Request, res: Response) => {
+    try {
+      const input = EditPostSchema.parse({
+        token: req.headers.authorization,
+        idToEdit: req.params.id,
+        content: req.body.content,
+      });
+
+      const output = await this.postBusiness.putPost(input);
 
       res.status(200).send(output);
     } catch (error) {
@@ -50,26 +76,7 @@ export class PostControlers {
       }
     }
   };
-  public putPost = async (req: Request, res: Response) => {
-    try {
-      const input = {
-        idToEdit: req.params.id,
-        newContent: req.body.content,
-      };
-      const output = await this.postBusiness.putPost(input);
-      res.status(201).send(output);
-    } catch (error) {
-      console.log(error);
 
-      if (error instanceof ZodError) {
-        res.status(400).send(error.issues);
-      } else if (error instanceof BaseError) {
-        res.status(error.statusCode).send(error.message);
-      } else {
-        res.status(500).send("Erro inesperado");
-      }
-    }
-  };
   public deletePosts = async (req: Request, res: Response) => {
     try {
       const input = { idToDelete: req.params.id };

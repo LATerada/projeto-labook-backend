@@ -10,7 +10,8 @@ export class PostDatabase extends BaseDatabase {
   > => {
     const result: PostDB[] = await (
       await BaseDatabase.connection(PostDatabase.TABLE_POSTS)
-    ).select(
+    )
+      .select(
         `${PostDatabase.TABLE_POSTS}.id`,
         `${PostDatabase.TABLE_POSTS}.creator_id`,
         `${PostDatabase.TABLE_POSTS}.content`,
@@ -31,6 +32,14 @@ export class PostDatabase extends BaseDatabase {
 
   public createPost = async (newPost: PostDB): Promise<void> => {
     await BaseDatabase.connection(PostDatabase.TABLE_POSTS).insert(newPost);
+  };
+
+  public findPostById = async (id: string): Promise<PostDB | undefined> => {
+    const [postDB]: PostDB[] | undefined[] = await BaseDatabase.connection(
+      PostDatabase.TABLE_POSTS
+    ).where({ id });
+
+    return postDB;
   };
 
   public editPost = async (newPost: PostDB): Promise<void> => {
