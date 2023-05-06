@@ -1,8 +1,9 @@
 import { PostDatabase } from "../database/PostDatabase";
+import { GetPostsInputDTO, GetPostsOutputDTO } from "../dtos/post/getPosts.dto";
 import { BadRequestError } from "../errors/BadRequestError";
 import { NotFoundError } from "../errors/NotFoundError";
+import { UnauthorizedError } from "../errors/UnauthorizedError";
 import { Post, PostDB } from "../models/Posts";
-import { HashManager } from "../services/HashManeger";
 import { IdGenerator } from "../services/IdGenerator";
 import { TokenManager } from "../services/TokenManeger";
 
@@ -13,29 +14,40 @@ export class PostBusiness {
     private tokenManeger: TokenManager
   ) {}
 
-  async getPost() {
-    const postsDB: PostDB[] = await this.postDatabase.findPosts();
+  public getPost = async (
+    input: GetPostsInputDTO
+  ): Promise<GetPostsOutputDTO> => {
+    const { token } = input;
 
-    const posts = postsDB.map((postDB) => {
-      return new Post(
-        postDB.id,
-        postDB.creator_id,
-        postDB.content,
-        postDB.likes,
-        postDB.dislikes,
-        postDB.created_at,
-        postDB.updated_at
+    const payload = this.tokenManeger.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError("Invalid token");
+    }
+
+    const postsWithCreatorName =
+      await this.postDatabase.findPostsWithCreatorName();
+
+    const posts = postsWithCreatorName.map((postWithCreatorName) => {
+      const post = new Post(
+        postWithCreatorName.id,
+        postWithCreatorName.content,
+        postWithCreatorName.likes,
+        postWithCreatorName.dislikes,
+        postWithCreatorName.created_at,
+        postWithCreatorName.updated_at,
+        postWithCreatorName.creator_id,
+        postWithCreatorName.creator_name
       );
+      return post.toBusinessModel();
     });
 
-    const output = {
-      posts,
-    };
+    const output: GetPostsOutputDTO = posts;
 
     return output;
-  }
+  };
 
-  async postPost(input: any) {
+  public postPost = async (input: any) => {
     const { id, creatorId, content } = input;
 
     if (typeof id !== "string") {
@@ -98,9 +110,9 @@ export class PostBusiness {
     };
 
     return output;
-  }
+  };
 
-  async putPost(input: any) {
+  public putPost = async (input: any) => {
     const { idToEdit, newContent } = input;
 
     if (newContent !== undefined) {
@@ -145,9 +157,9 @@ export class PostBusiness {
     };
 
     return output;
-  }
+  };
 
-  async deletePost(input: any) {
+  public deletePost = async (input: any) => {
     const { idToDelete } = input;
 
     const postDBExists = this.postDatabase.findPostsById(idToDelete);
@@ -163,5 +175,5 @@ export class PostBusiness {
     };
 
     return output;
-  }
+  };
 }
