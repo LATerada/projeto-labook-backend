@@ -4,9 +4,17 @@ import { UserSignupInputDTO } from "../dtos/users/UserSignup.dto";
 import { BadRequestError } from "../errors/BadRequestError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { UserDB, Users } from "../models/Users";
+import { HashManager } from "../services/HashManeger";
+import { IdGenerator } from "../services/IdGenerator";
+import { TokenManager } from "../services/TokenManeger";
 
 export class UserBusiness {
-  constructor(private userDatabase: UserDatabase) {}
+  constructor(
+    private userDatabase: UserDatabase,
+    private idGenerator: IdGenerator,
+    private tokenManeger: TokenManager,
+    private hashManeger: HashManager
+  ) {}
 
   async userSignup(input: UserSignupInputDTO) {
     const { name, email, password } = input;
