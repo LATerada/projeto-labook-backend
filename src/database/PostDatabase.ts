@@ -8,8 +8,8 @@ export class PostDatabase extends BaseDatabase {
   public findPostsWithCreatorName = async (): Promise<
     PostDBWithCreatorName[]
   > => {
-    const result: PostDB[] = await (
-      await BaseDatabase.connection(PostDatabase.TABLE_POSTS)
+    const result: PostDB[] = await BaseDatabase.connection(
+      PostDatabase.TABLE_POSTS
     )
       .select(
         `${PostDatabase.TABLE_POSTS}.id`,

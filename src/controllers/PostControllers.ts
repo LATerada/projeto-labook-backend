@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ZodError } from "zod";
 import { PostBusiness } from "../business/PostBusiness";
 import { CreatePostSchema } from "../dtos/post/createPost.dto";
+import { DeletePostSchema } from "../dtos/post/delete.dto";
 import { EditPostSchema } from "../dtos/post/editPost.dto";
 import { GetPostsSchema } from "../dtos/post/getPosts.dto";
 import { BaseError } from "../errors/BaseError";
@@ -79,7 +80,10 @@ export class PostControlers {
 
   public deletePosts = async (req: Request, res: Response) => {
     try {
-      const input = { idToDelete: req.params.id };
+      const input = DeletePostSchema.parse({
+        token: req.headers.authorization,
+        idToDelete: req.params.id,
+      });
 
       const output = this.postBusiness.deletePost(input);
 
