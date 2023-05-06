@@ -8,7 +8,7 @@ import { BaseError } from "../errors/BaseError";
 export class UserController {
   constructor(private userBusiness: UserBusiness) {}
 
-  userSignup = async (req: Request, res: Response) => {
+  signup = async (req: Request, res: Response) => {
     try {
       const input = SignupSchema.parse({
         name: req.body.name,
@@ -16,7 +16,7 @@ export class UserController {
         password: req.body.password,
       });
 
-      const output = await this.userBusiness.userSignup(input);
+      const output = await this.userBusiness.signup(input);
 
       res.status(201).send(output);
     } catch (error) {

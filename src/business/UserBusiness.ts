@@ -1,9 +1,10 @@
 import { UserDatabase } from "../database/UserDatabase";
 import { LoginInputDTO } from "../dtos/user/login.dto";
-import { SignupInputDTO } from "../dtos/user/signup.dto";
+import { SignupInputDTO, SignupOutputDTO } from "../dtos/user/signup.dto";
 import { BadRequestError } from "../errors/BadRequestError";
+import { ConflictError } from "../errors/ConflictError";
 import { NotFoundError } from "../errors/NotFoundError";
-import { UserDB, Users } from "../models/Users";
+import { TokenPayload, UserDB, Users, USER_ROLES } from "../models/Users";
 import { HashManager } from "../services/HashManeger";
 import { IdGenerator } from "../services/IdGenerator";
 import { TokenManager } from "../services/TokenManeger";
@@ -16,37 +17,40 @@ export class UserBusiness {
     private hashManeger: HashManager
   ) {}
 
-  async userSignup(input: SignupInputDTO) {
+  async signup(input: SignupInputDTO) {
     const { name, email, password } = input;
 
     const userBDExists = await this.userDatabase.findUserByEmail(email);
 
     if (userBDExists) {
-      throw new BadRequestError("'email' already registered");
+      throw new ConflictError("email already exists");
     }
 
+    const id = this.idGenerator.generate();
+    const hashedPassword = await this.hashManeger.hash(password);
+
     const newUser = new Users(
-      `u${email}`,
+      id,
       name,
       email,
-      password,
-      "role",
-      `${new Date()}`
+      hashedPassword,
+      USER_ROLES.NORMAL,
+      new Date().toISOString()
     );
 
-    const newUserDB: UserDB = {
-      id: newUser.getId(),
-      name: newUser.getName(),
-      email: newUser.getEmail(),
-      password: newUser.getPassaword(),
-      role: newUser.getRole(),
-      created_at: newUser.getCreatedAt(),
-    };
-
+    const newUserDB = newUser.toDBModel();
     await this.userDatabase.postUser(newUserDB);
 
-    const output = {
-      token: "signinToken",
+    const payload: TokenPayload = {
+      id: newUser.getId(),
+      name: newUser.getName(),
+      role: newUser.getRole(),
+    };
+
+    const token = this.tokenManeger.createToken(payload);
+
+    const output: SignupOutputDTO = {
+      token,
     };
 
     return output;
