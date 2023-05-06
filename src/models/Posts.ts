@@ -8,23 +8,44 @@ export interface PostDB {
   updated_at: string;
 }
 
+export interface PostModel {
+  id: string;
+  content: string;
+  likes: number;
+  dislikes: number;
+  created_at: string;
+  updated_at: string;
+  creator: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface LikeDislikeDB {
+  user_id: string;
+  post_id: string;
+  like: number;
+}
+
+export enum POST_LIKE {
+  ALREADY_LIKED = "ALREADY_LIKED",
+  ALREADY_DISLIKED = "ALREADY_DISLIKED",
+}
+
 export class Post {
   constructor(
     private id: string,
-    private creatorId: string,
     private content: string,
     private likes: number,
     private dislikes: number,
     private createdAt: string,
-    private updatedAt: string
+    private updatedAt: string,
+    private creatorId: string,
+    private creatorName: string
   ) {}
 
   public getId(): string {
     return this.id;
-  }
-
-  public getCreatorId(): string {
-    return this.creatorId;
   }
 
   public getContent(): string {
@@ -57,5 +78,46 @@ export class Post {
   }
   public setUpdatedAt(value: string) {
     this.updatedAt = value;
+  }
+
+  public getCreatorId(): string {
+    return this.creatorId;
+  }
+  public setCreatorId(value: string) {
+    this.creatorId = value;
+  }
+
+  public getCreatorName(): string {
+    return this.creatorName;
+  }
+  public setCreatorName(value: string) {
+    this.creatorName = value;
+  }
+
+  public toDBModel(): PostDB {
+    return {
+      id: this.id,
+      creator_id: this.creatorId,
+      content: this.content,
+      likes: this.likes,
+      dislikes: this.dislikes,
+      created_at: this.createdAt,
+      updated_at: this.updatedAt,
+    };
+  }
+
+  public toBusinessModel(): PostModel {
+    return {
+      id: this.id,
+      content: this.content,
+      likes: this.likes,
+      dislikes: this.dislikes,
+      created_at: this.createdAt,
+      updated_at: this.updatedAt,
+      creator: {
+        id: this.creatorId,
+        name: this.creatorName,
+      },
+    };
   }
 }

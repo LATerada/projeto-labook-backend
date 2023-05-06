@@ -2,9 +2,16 @@ import { PostDatabase } from "../database/PostDatabase";
 import { BadRequestError } from "../errors/BadRequestError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { Post, PostDB } from "../models/Posts";
+import { HashManager } from "../services/HashManeger";
+import { IdGenerator } from "../services/IdGenerator";
+import { TokenManager } from "../services/TokenManeger";
 
 export class PostBusiness {
-  constructor(private postDatabase: PostDatabase) {}
+  constructor(
+    private postDatabase: PostDatabase,
+    private idGenerator: IdGenerator,
+    private tokenManeger: TokenManager
+  ) {}
 
   async getPost() {
     const postsDB: PostDB[] = await this.postDatabase.findPosts();
