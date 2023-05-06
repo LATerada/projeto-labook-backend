@@ -1,10 +1,10 @@
 import { UserDatabase } from "../database/UserDatabase";
-import { LoginInputDTO } from "../dtos/user/login.dto";
+import { LoginInputDTO, LoginOutputDTO } from "../dtos/user/login.dto";
 import { SignupInputDTO, SignupOutputDTO } from "../dtos/user/signup.dto";
 import { BadRequestError } from "../errors/BadRequestError";
 import { ConflictError } from "../errors/ConflictError";
 import { NotFoundError } from "../errors/NotFoundError";
-import { TokenPayload, UserDB, Users, USER_ROLES } from "../models/Users";
+import { TokenPayload, User, USER_ROLES } from "../models/User";
 import { HashManager } from "../services/HashManeger";
 import { IdGenerator } from "../services/IdGenerator";
 import { TokenManager } from "../services/TokenManeger";
@@ -17,7 +17,7 @@ export class UserBusiness {
     private hashManeger: HashManager
   ) {}
 
-  async signup(input: SignupInputDTO) {
+  public signup = async (input: SignupInputDTO) => {
     const { name, email, password } = input;
 
     const userBDExists = await this.userDatabase.findUserByEmail(email);
@@ -29,7 +29,7 @@ export class UserBusiness {
     const id = this.idGenerator.generate();
     const hashedPassword = await this.hashManeger.hash(password);
 
-    const newUser = new Users(
+    const newUser = new User(
       id,
       name,
       email,
@@ -54,27 +54,49 @@ export class UserBusiness {
     };
 
     return output;
-  }
+  };
 
-  async userLogin(input: LoginInputDTO) {
+  public userLogin = async (input: LoginInputDTO) => {
     const { email, password } = input;
 
     const userBDExists = await this.userDatabase.findUserByEmail(email);
 
     if (!userBDExists) {
-      throw new NotFoundError("User not founded");
+      throw new NotFoundError("Email not found");
     }
 
-    if (userBDExists.password !== password) {
-      throw new BadRequestError("Incorrect password");
+    const user = new User(
+      userBDExists.id,
+      userBDExists.name,
+      userBDExists.email,
+      userBDExists.password,
+      userBDExists.role,
+      userBDExists.created_at
+    );
+
+    const hashedPassword = userBDExists.password;
+
+    const isCorrectPassword = await this.hashManeger.compare(
+      password,
+      hashedPassword
+    );
+
+    if (!isCorrectPassword) {
+      throw new BadRequestError("Incorrect email or password");
     }
 
-    // generate token
+    const payload: TokenPayload = {
+      id: user.getId(),
+      name: user.getName(),
+      role: user.getRole(),
+    };
 
-    const output = {
-      token: "loginInput",
+    const token = this.tokenManeger.createToken(payload);
+
+    const output: LoginOutputDTO = {
+      token,
     };
 
     return output;
-  }
+  };
 }

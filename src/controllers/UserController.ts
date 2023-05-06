@@ -8,7 +8,7 @@ import { BaseError } from "../errors/BaseError";
 export class UserController {
   constructor(private userBusiness: UserBusiness) {}
 
-  signup = async (req: Request, res: Response) => {
+  public signup = async (req: Request, res: Response) => {
     try {
       const input = SignupSchema.parse({
         name: req.body.name,
@@ -32,7 +32,7 @@ export class UserController {
     }
   };
 
-  userLogin = async (req: Request, res: Response) => {
+  public login = async (req: Request, res: Response) => {
     try {
       const input = LoginSchema.parse({
         email: req.body.email,
