@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { ZodError } from "zod";
 import { PostBusiness } from "../business/PostBusiness";
+import { CreatePostSchema } from "../dtos/post/createPost.dto";
 import { GetPostsSchema } from "../dtos/post/getPosts.dto";
 import { BaseError } from "../errors/BaseError";
 
@@ -29,11 +30,10 @@ export class PostControlers {
   };
   public postPost = async (req: Request, res: Response) => {
     try {
-      const input = {
-        id: req.body.id,
-        creatorId: req.body.creator_id,
+      const input = CreatePostSchema.parse({
+        token: req.headers.authorization,
         content: req.body.content,
-      };
+      });
 
       const output = await this.postBusiness.postPost(input);
 

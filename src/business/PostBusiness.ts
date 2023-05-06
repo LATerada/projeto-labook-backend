@@ -1,6 +1,9 @@
 import { PostDatabase } from "../database/PostDatabase";
+import {
+  CreatePostInputDTO,
+  CreatePostOutputDTO,
+} from "../dtos/post/createPost.dto";
 import { GetPostsInputDTO, GetPostsOutputDTO } from "../dtos/post/getPosts.dto";
-import { BadRequestError } from "../errors/BadRequestError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
 import { Post, PostDB } from "../models/Posts";
@@ -47,67 +50,34 @@ export class PostBusiness {
     return output;
   };
 
-  public postPost = async (input: any) => {
-    const { id, creatorId, content } = input;
+  public postPost = async (
+    input: CreatePostInputDTO
+  ): Promise<CreatePostOutputDTO> => {
+    const { token, content } = input;
 
-    if (typeof id !== "string") {
-      throw new Error("'id' deve ser string");
-    }
-    if (id[0] !== "p") {
-      throw new Error("'id' deve iniciar com 'p'");
-    }
-    if (id.length < 4) {
-      throw new Error("'id' deve conter pelo menos 4 caracteres");
+    const payload = this.tokenManeger.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError("Invalid token");
     }
 
-    if (typeof creatorId !== "string") {
-      throw new Error("'creatorId' deve ser string");
-    }
-    if (creatorId[0] !== "u") {
-      throw new Error("'creatorId' deve iniciar com 'u'");
-    }
-    if (creatorId.length < 4) {
-      throw new Error("'creatorId' deve conter pelo menos 4 caracteres");
-    }
-
-    if (typeof content !== "string") {
-      throw new Error("'content' deve ser string");
-    }
-    if (content.length < 1) {
-      throw new Error("'content' deve conter pelo menos 1 caracteres");
-    }
-
-    const postDBExists = await this.postDatabase.findPostsById(id);
-
-    if (postDBExists) {
-      throw new BadRequestError("'id' already exists");
-    }
+    const id = this.idGenerator.generate();
 
     const newPost = new Post(
       id,
-      creatorId,
       content,
       0,
       0,
       new Date().toString(),
-      new Date().toString()
+      new Date().toString(),
+      payload.id,
+      payload.name
     );
 
-    const newPostDB: PostDB = {
-      id: newPost.getId(),
-      creator_id: newPost.getCreatorId(),
-      content: newPost.getContent(),
-      likes: newPost.getLikes(),
-      dislikes: newPost.getDislikes(),
-      created_at: newPost.getCreatedAt(),
-      updated_at: newPost.getUdatedAt(),
-    };
-
+    const newPostDB = newPost.toDBModel();
     await this.postDatabase.createPost(newPostDB);
 
-    const output = {
-      newPostDB,
-    };
+    const output: CreatePostOutputDTO = undefined;
 
     return output;
   };
