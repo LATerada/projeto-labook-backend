@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { ZodError } from "zod";
 import { UserBusiness } from "../business/UserBusiness";
-import { UserLoginSchema } from "../dtos/users/userLogin.dto";
-import { UserSignupSchema } from "../dtos/users/userSignup.dto";
+import { LoginSchema } from "../dtos/user/login.dto";
+import { SignupSchema } from "../dtos/user/signup.dto";
 import { BaseError } from "../errors/BaseError";
 
 export class UserController {
@@ -10,7 +10,7 @@ export class UserController {
 
   userSignup = async (req: Request, res: Response) => {
     try {
-      const input = UserSignupSchema.parse({
+      const input = SignupSchema.parse({
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
@@ -34,7 +34,7 @@ export class UserController {
 
   userLogin = async (req: Request, res: Response) => {
     try {
-      const input = UserLoginSchema.parse({
+      const input = LoginSchema.parse({
         email: req.body.email,
         password: req.body.password,
       });

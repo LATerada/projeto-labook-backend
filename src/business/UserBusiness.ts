@@ -1,6 +1,6 @@
 import { UserDatabase } from "../database/UserDatabase";
-import { UserLoginInputDTO } from "../dtos/users/UserLogin.dto";
-import { UserSignupInputDTO } from "../dtos/users/UserSignup.dto";
+import { LoginInputDTO } from "../dtos/user/login.dto";
+import { SignupInputDTO } from "../dtos/user/signup.dto";
 import { BadRequestError } from "../errors/BadRequestError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { UserDB, Users } from "../models/Users";
@@ -16,7 +16,7 @@ export class UserBusiness {
     private hashManeger: HashManager
   ) {}
 
-  async userSignup(input: UserSignupInputDTO) {
+  async userSignup(input: SignupInputDTO) {
     const { name, email, password } = input;
 
     const userBDExists = await this.userDatabase.findUserByEmail(email);
@@ -52,7 +52,7 @@ export class UserBusiness {
     return output;
   }
 
-  async userLogin(input: UserLoginInputDTO) {
+  async userLogin(input: LoginInputDTO) {
     const { email, password } = input;
 
     const userBDExists = await this.userDatabase.findUserByEmail(email);
