@@ -85,7 +85,7 @@ export class PostControlers {
         idToDelete: req.params.id,
       });
 
-      const output = this.postBusiness.deletePost(input);
+      const output = await this.postBusiness.deletePost(input);
 
       res.status(200).send(output);
     } catch (error) {
