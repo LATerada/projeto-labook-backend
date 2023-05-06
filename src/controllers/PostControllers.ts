@@ -5,6 +5,7 @@ import { CreatePostSchema } from "../dtos/post/createPost.dto";
 import { DeletePostSchema } from "../dtos/post/delete.dto";
 import { EditPostSchema } from "../dtos/post/editPost.dto";
 import { GetPostsSchema } from "../dtos/post/getPosts.dto";
+import { LikeOrDislikePostSchema } from "../dtos/post/likeOrDislikePost.dto";
 import { BaseError } from "../errors/BaseError";
 
 export class PostControlers {
@@ -26,7 +27,7 @@ export class PostControlers {
       } else if (error instanceof BaseError) {
         res.status(error.statusCode).send(error.message);
       } else {
-        res.status(500).send("Erro inesperado");
+        res.status(500).send("Unexpected Error");
       }
     }
   };
@@ -49,7 +50,7 @@ export class PostControlers {
       } else if (error instanceof BaseError) {
         res.status(error.statusCode).send(error.message);
       } else {
-        res.status(500).send("Erro inesperado");
+        res.status(500).send("Unexpected Error");
       }
     }
   };
@@ -73,7 +74,7 @@ export class PostControlers {
       } else if (error instanceof BaseError) {
         res.status(error.statusCode).send(error.message);
       } else {
-        res.status(500).send("Erro inesperado");
+        res.status(500).send("Unexpected Error");
       }
     }
   };
@@ -96,7 +97,31 @@ export class PostControlers {
       } else if (error instanceof BaseError) {
         res.status(error.statusCode).send(error.message);
       } else {
-        res.status(500).send("Erro inesperado");
+        res.status(500).send("Unexpected Error");
+      }
+    }
+  };
+
+  public likeOrDislikePost = async (req: Request, res: Response) => {
+    try {
+      const input = LikeOrDislikePostSchema.parse({
+        token: req.headers.authorization,
+        idToLikeOrDislike: req.params.id,
+        like: req.body.like
+      });
+
+      const output = await this.postBusiness.likeOrDislikePost(input);
+
+      res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Unexpected Error");
       }
     }
   };

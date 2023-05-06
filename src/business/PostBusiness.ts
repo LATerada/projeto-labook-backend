@@ -9,10 +9,14 @@ import {
 } from "../dtos/post/delete.dto";
 import { EditPostInputDTO, EditPostOutputDTO } from "../dtos/post/editPost.dto";
 import { GetPostsInputDTO, GetPostsOutputDTO } from "../dtos/post/getPosts.dto";
+import {
+  LikeOrDislikePostInputDTO,
+  LikeOrDislikePostOutputDTO,
+} from "../dtos/post/likeOrDislikePost.dto";
 import { ForbiddenError } from "../errors/ForbiddenError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
-import { Post, PostDB } from "../models/Posts";
+import { LikeDislikeDB, Post, PostDB, POST_LIKE } from "../models/Posts";
 import { USER_ROLES } from "../models/User";
 import { IdGenerator } from "../services/IdGenerator";
 import { TokenManager } from "../services/TokenManeger";
@@ -157,6 +161,84 @@ export class PostBusiness {
     await this.postDatabase.removePost(idToDelete);
 
     const output: DeletePostOutputDTO = undefined;
+
+    return output;
+  };
+
+  public likeOrDislikePost = async (
+    input: LikeOrDislikePostInputDTO
+  ): Promise<LikeOrDislikePostOutputDTO> => {
+    const { token, idToLikeOrDislike, like } = input;
+
+    const payload = this.tokenManeger.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError("Invalid token");
+    }
+
+    const postDBWithCreatorName =
+      await this.postDatabase.findPostsWithCreatorNameById(idToLikeOrDislike);
+
+    if (!postDBWithCreatorName) {
+      throw new NotFoundError("Post id not found");
+    }
+
+    const post = new Post(
+      postDBWithCreatorName.id,
+      postDBWithCreatorName.content,
+      postDBWithCreatorName.likes,
+      postDBWithCreatorName.dislikes,
+      postDBWithCreatorName.created_at,
+      postDBWithCreatorName.updated_at,
+      postDBWithCreatorName.creator_id,
+      postDBWithCreatorName.creator_name
+    );
+
+    const likeSQLlite = like ? 1 : 0;
+
+    const likeOrDislikeDB: LikeDislikeDB = {
+      user_id: payload.id,
+      post_id: postDBWithCreatorName.id,
+      like: likeSQLlite,
+    };
+
+    const likeOrDislikePostExists = await this.postDatabase.findLikeDislikePost(
+      likeOrDislikeDB
+    );
+
+    if (post.getCreatorId() === payload.id) {
+      throw new ForbiddenError(
+        "The post creator can not give likes or dislikes"
+      );
+    }
+
+    if (likeOrDislikePostExists === POST_LIKE.ALREADY_LIKED) {
+      if (like) {
+        await this.postDatabase.removeLikeOrDislike(likeOrDislikeDB);
+        post.removeLike();
+      } else {
+        await this.postDatabase.updateLikeOrDislike(likeOrDislikeDB);
+        post.removeLike();
+        post.addDislike();
+      }
+    } else if (likeOrDislikePostExists === POST_LIKE.ALREADY_DISLIKED) {
+      if (like === false) {
+        await this.postDatabase.removeLikeOrDislike(likeOrDislikeDB);
+        post.removeDislike();
+      } else {
+        await this.postDatabase.updateLikeOrDislike(likeOrDislikeDB);
+        post.removeDislike();
+        post.addLike();
+      }
+    } else {
+      await this.postDatabase.insertLikeOrDislike(likeOrDislikeDB);
+      like ? post.addLike() : post.addDislike();
+    }
+
+    const updatedPostDB = post.toDBModel();
+    await this.postDatabase.editPost(updatedPostDB);
+
+    const output: LikeOrDislikePostOutputDTO = undefined;
 
     return output;
   };
