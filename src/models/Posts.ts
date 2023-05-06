@@ -8,6 +8,17 @@ export interface PostDB {
   updated_at: string;
 }
 
+export interface PostDBWithCreatorName {
+  id: string;
+  creator_id: string;
+  content: string;
+  likes: number;
+  dislikes: number;
+  created_at: string;
+  updated_at: string;
+  creator_name: string;
+}
+
 export interface PostModel {
   id: string;
   content: string;
@@ -61,6 +72,12 @@ export class Post {
   public setLikes(value: number) {
     this.likes = value;
   }
+  public addLike = (): void => {
+    this.likes++;
+  };
+  public removeLike = (): void => {
+    this.likes--;
+  };
 
   public getDislikes(): number {
     return this.dislikes;
@@ -68,6 +85,12 @@ export class Post {
   public setDislikes(value: number) {
     this.dislikes = value;
   }
+  public addDislike = (): void => {
+    this.dislikes++;
+  };
+  public removeDislike = (): void => {
+    this.dislikes--;
+  };
 
   public getCreatedAt(): string {
     return this.createdAt;
